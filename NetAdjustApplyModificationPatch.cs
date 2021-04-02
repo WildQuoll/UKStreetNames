@@ -8,6 +8,9 @@ using UnityEngine;
 
 namespace UKStreetNames
 {
+    // This patch ensures all relevant roads have their names updated
+    // when the 'Adjust roads' tool is used.
+
     [HarmonyPriority(Priority.VeryHigh)]
     [HarmonyPatch(typeof(NetAdjust), "ApplyModification")]
     class NetAdjustApplyModificationPatch

@@ -55,6 +55,22 @@ namespace UKStreetNames
             return manager.m_segments.m_buffer[id].m_averageLength;
         }
 
+        public RoadElevation GetSegmentElevation(ushort id)
+        {
+            if( manager.m_segments.m_buffer[id].Info.m_netAI.IsOverground())
+            {
+                return RoadElevation.BRIDGE;
+            }
+            else if (manager.m_segments.m_buffer[id].Info.m_netAI.IsUnderground())
+            {
+                return RoadElevation.TUNNEL;
+            }
+            else 
+            {
+                return RoadElevation.GROUND;
+            }
+        }
+
         public float GetSegmentTotalLaneLength(ushort id)
         {
             var segment = manager.m_segments.m_buffer[id];

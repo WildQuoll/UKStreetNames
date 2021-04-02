@@ -18,7 +18,7 @@ namespace UKStreetNames
 
         private static RoadNameCache GetCache(RoadElevation elevation)
         {
-            switch(elevation)
+            switch (elevation)
             {
                 case RoadElevation.GROUND:
                     return roadCache;
@@ -32,12 +32,12 @@ namespace UKStreetNames
             return roadCache;
         }
 
-        public static string GenerateName(ushort segmentID, ushort nameSeed, RoadElevation elevation, bool ignoreCache = false)
+        public static string GenerateName(ushort segmentID, RoadElevation elevation)
         {
             var cache = GetCache(elevation);
 
             string cachedName = cache.FindName(segmentID);
-            if (cachedName == null || ignoreCache)
+            if (cachedName == null)
             {
                 var road = new Road(segmentID);
 
@@ -65,7 +65,7 @@ namespace UKStreetNames
         public static void Postfix(ushort segmentID, ref NetSegment data, NetInfo ___m_info, ref string __result)
         {
             //Debug.Log("Generating name for " + segmentID);
-            __result = RoadNameGenerator.GenerateName(segmentID, data.m_nameSeed, RoadElevation.GROUND);
+            __result = RoadNameGenerator.GenerateName(segmentID, RoadElevation.GROUND);
         }
     }
 
@@ -76,7 +76,7 @@ namespace UKStreetNames
         [HarmonyPostfix]
         public static void Postfix(ushort segmentID, ref NetSegment data, NetInfo ___m_info, ref string __result)
         {
-            __result = RoadNameGenerator.GenerateName(segmentID, data.m_nameSeed, RoadElevation.TUNNEL);
+            __result = RoadNameGenerator.GenerateName(segmentID, RoadElevation.TUNNEL);
         }
     }
 
@@ -87,7 +87,7 @@ namespace UKStreetNames
         [HarmonyPostfix]
         public static void Postfix(ushort segmentID, ref NetSegment data, NetInfo ___m_info, ref string __result)
         {
-            __result = RoadNameGenerator.GenerateName(segmentID, data.m_nameSeed, RoadElevation.BRIDGE);
+            __result = RoadNameGenerator.GenerateName(segmentID, RoadElevation.BRIDGE);
         }
     }
 }

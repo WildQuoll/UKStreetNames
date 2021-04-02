@@ -13,10 +13,12 @@ namespace UKStreetNames
     class NetManagerSimulationStepImplPatch
     {
         [HarmonyPrefix]
-        public static void Prefix(int subStep, bool ___m_segmentsUpdated, ulong[] ___m_updatedSegments)
+        public static void Prefix(int subStep, bool ___m_segmentsUpdated, ulong[] ___m_updatedSegments, out HashSet<ushort> __state)
         {
+            // __state will contain IDs of all road segments whose name may require updating.
             if (!___m_segmentsUpdated)
             {
+                __state = null;
                 return;
             }
 
@@ -24,7 +26,7 @@ namespace UKStreetNames
 
             var segmentIds = GetCorrespondingSegmentIds(___m_updatedSegments);
 
-            var affectedSegmentIds = new HashSet<ushort>();
+            __state = new HashSet<ushort>();
 
             var netHelper = new NetHelper();
             while(segmentIds.Count > 0)
@@ -38,10 +40,24 @@ namespace UKStreetNames
                 }
 
                 var road = new Road(segmentId);
-                affectedSegmentIds.UnionWith(road.m_segmentIds);
+                __state.UnionWith(road.m_segmentIds);
                 segmentIds.ExceptWith(road.m_segmentIds);
             }
-            FlagSegmentsAsUpdated(affectedSegmentIds, ref ___m_updatedSegments);
+
+            // Might be able to optimise it further by subtracting 'segmentIds' (before they were emptied) from '__state', but it doesn't seem necessary.
+        }
+
+        [HarmonyPostfix]
+        public static void Postfix(int subStep, HashSet<ushort> __state)
+        {
+            if (__state != null)
+            {
+                NetManager manager = Singleton<NetManager>.instance;
+                foreach (var id in __state)
+                {
+                    manager.UpdateSegmentRenderer(id, false);
+                }
+            }
         }
 
         private static HashSet<ushort> GetCorrespondingSegmentIds(ulong[] segmentInternalIdStore)
@@ -66,15 +82,6 @@ namespace UKStreetNames
             }
 
             return segmentIds;
-        }
-
-        public static void FlagSegmentsAsUpdated(HashSet<ushort> ids, ref ulong[] store)
-        {
-            // From NetManager.UpdateSegment
-            foreach (var id in ids)
-            {
-                store[id >> 6] |= (ulong)(1L << id);
-            }
         }
     }
 }

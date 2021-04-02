@@ -16,12 +16,28 @@ namespace UKStreetNames
             bridgeCache.Clear();
         }
 
-        public static string GenerateName(ushort segmentID, ushort nameSeed, RoadCategory? overrideCategory)
+        private static RoadNameCache GetCache(RoadElevation elevation)
         {
-            var cache = overrideCategory == null ? roadCache : (overrideCategory.Value == RoadCategory.BRIDGE ? bridgeCache : tunnelCache);
+            switch(elevation)
+            {
+                case RoadElevation.GROUND:
+                    return roadCache;
+                case RoadElevation.BRIDGE:
+                    return bridgeCache;
+                case RoadElevation.TUNNEL:
+                    return tunnelCache;
+            }
+
+            // Shouldn't end up here
+            return roadCache;
+        }
+
+        public static string GenerateName(ushort segmentID, ushort nameSeed, RoadElevation elevation, bool ignoreCache = false)
+        {
+            var cache = GetCache(elevation);
 
             string cachedName = cache.FindName(segmentID);
-            if (cachedName == null)
+            if (cachedName == null || ignoreCache)
             {
                 var road = new Road(segmentID);
 
@@ -30,7 +46,7 @@ namespace UKStreetNames
                     NameListManager.TryToMatchToExistingMotorway(segmentID, ref road);
                 }
 
-                string name = NameListManager.GenerateRoadName(ref road, overrideCategory);
+                string name = NameListManager.GenerateRoadName(ref road, elevation);
                 cache.AddToCache(road, name);
                 return name;
             }
@@ -49,7 +65,7 @@ namespace UKStreetNames
         public static void Postfix(ushort segmentID, ref NetSegment data, NetInfo ___m_info, ref string __result)
         {
             //Debug.Log("Generating name for " + segmentID);
-            __result = RoadNameGenerator.GenerateName(segmentID, data.m_nameSeed, null);
+            __result = RoadNameGenerator.GenerateName(segmentID, data.m_nameSeed, RoadElevation.GROUND);
         }
     }
 
@@ -60,7 +76,7 @@ namespace UKStreetNames
         [HarmonyPostfix]
         public static void Postfix(ushort segmentID, ref NetSegment data, NetInfo ___m_info, ref string __result)
         {
-            __result = RoadNameGenerator.GenerateName(segmentID, data.m_nameSeed, RoadCategory.TUNNEL);
+            __result = RoadNameGenerator.GenerateName(segmentID, data.m_nameSeed, RoadElevation.TUNNEL);
         }
     }
 
@@ -71,7 +87,7 @@ namespace UKStreetNames
         [HarmonyPostfix]
         public static void Postfix(ushort segmentID, ref NetSegment data, NetInfo ___m_info, ref string __result)
         {
-            __result = RoadNameGenerator.GenerateName(segmentID, data.m_nameSeed, RoadCategory.BRIDGE);
+            __result = RoadNameGenerator.GenerateName(segmentID, data.m_nameSeed, RoadElevation.BRIDGE);
         }
     }
 }

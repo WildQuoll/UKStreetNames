@@ -31,6 +31,13 @@ namespace UKStreetNames
         LONG = 1024
     }
 
+    public enum RoadElevation
+    {
+        GROUND,
+        BRIDGE,
+        TUNNEL
+    }
+
     [System.Flags]
     public enum RoadCategory
     {

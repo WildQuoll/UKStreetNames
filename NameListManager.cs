@@ -76,7 +76,7 @@ namespace UKStreetNames
             return name;
         }
 
-        public static string GenerateRoadName(ref Road road, RoadCategory? overrideCategory = null)
+        public static string GenerateRoadName(ref Road road, RoadElevation elevation)
         {
             var seed = road.m_nameSeed;
             var category = road.m_predominantCategory;
@@ -98,9 +98,13 @@ namespace UKStreetNames
                 return GenerateMotorwayName(seed);
             }
 
-            if (overrideCategory.HasValue)
+            if (elevation == RoadElevation.BRIDGE)
             {
-                category = overrideCategory.Value;
+                category = RoadCategory.BRIDGE;
+            }
+            else if (elevation == RoadElevation.TUNNEL)
+            {
+                category = RoadCategory.TUNNEL;
             }
 
             Randomizer prefixRandomiser = new Randomizer(seed);

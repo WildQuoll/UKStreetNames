@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace UKStreetNames
 {
-    class NetHelper
+    public class NetHelper
     {
         NetManager manager;
 

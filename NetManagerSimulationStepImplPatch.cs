@@ -23,7 +23,6 @@ namespace UKStreetNames
             RoadNameGenerator.ClearCache();
 
             var segmentIds = GetCorrespondingSegmentIds(___m_updatedSegments);
-            //Debug.Log("Updated segment IDs: " + segmentIds.Join());
 
             var affectedSegmentIds = new HashSet<ushort>();
 
@@ -38,13 +37,10 @@ namespace UKStreetNames
                     continue;
                 }
 
-                var roadId = netHelper.GetSegmentNameSeed(segmentId);
-
                 var road = new Road(segmentId);
                 affectedSegmentIds.UnionWith(road.m_segmentIds);
                 segmentIds.ExceptWith(road.m_segmentIds);
             }
-            //Debug.Log("All affected IDs: " + affectedSegmentIds.Join());
             FlagSegmentsAsUpdated(affectedSegmentIds, ref ___m_updatedSegments);
         }
 
